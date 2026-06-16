@@ -1,6 +1,6 @@
-# DsPdfJS Samples
+# Document Solutions for PDF JS Samples
 
-Samples for [**DsPdfJS** (`@mescius/ds-pdf`)](https://www.npmjs.com/package/@mescius/ds-pdf) — 
+Samples for [**Document Solutions for PDF JS (DsPdfJS)** (`@mescius/ds-pdf`)](https://www.npmjs.com/package/@mescius/ds-pdf) -
 a JavaScript/TypeScript library for working with PDF documents, SVG documents, and raster bitmaps that can be saved as PNG or JPEG in the browser or in Node.js. 
 See the [DsPdfJS product page](https://developer.mescius.com/document-solutions/javascript-pdf-api/) for full details, documentation, and licensing,
 or try the [live demos](https://developer.mescius.com/document-solutions/javascript-pdf-api/demos/getting-started) in your browser.
