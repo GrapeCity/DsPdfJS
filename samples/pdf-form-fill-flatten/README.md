@@ -1,6 +1,6 @@
 # Fill and flatten PDF forms with JavaScript and DsPdfJS
 
-A React + TypeScript + Vite app demonstrating [**DsPdfJS** (`@mescius/ds-pdf`)](https://www.npmjs.com/package/@mescius/ds-pdf): loading an existing **AcroForm** PDF, filling its fields from a JSON file, and saving the result either as an **editable** form or as a **flattened** PDF.
+A React + TypeScript + Vite app demonstrating [**Document Solutions for PDF JS (DsPdfJS)** (`@mescius/ds-pdf`)](https://www.npmjs.com/package/@mescius/ds-pdf): loading an existing **AcroForm** PDF, filling its fields from a JSON file, and saving the result either as an **editable** form or as a **flattened** PDF.
 
 You can [try DsPdfJS live](https://developer.mescius.com/document-solutions/javascript-pdf-api/demos/getting-started) without installing anything.
 
