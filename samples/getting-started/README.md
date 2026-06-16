@@ -1,6 +1,7 @@
-# Getting started with DsPdfJS
+# Getting Started with Document Solutions for PDF JS
 
-A minimal React + TypeScript + Vite app demonstrating [**DsPdfJS** (`@mescius/ds-pdf`)](https://www.npmjs.com/package/@mescius/ds-pdf): connecting to the DsPdfJS WebAssembly (Wasm) module and drawing the same text and graphics to a **PDF page**, an **SVG document**, and a **bitmap saved as PNG**.
+A minimal React + TypeScript + Vite app demonstrating [**Document Solutions for PDF JS (DsPdfJS)** (`@mescius/ds-pdf`)](https://www.npmjs.com/package/@mescius/ds-pdf):
+connecting to the DsPdfJS WebAssembly (Wasm) module and drawing the same text and graphics to a **PDF page**, an **SVG document**, and a **bitmap saved as PNG**.
 
 You can [try DsPdfJS live](https://developer.mescius.com/document-solutions/javascript-pdf-api/demos/getting-started) without installing anything.
 
