@@ -19,6 +19,7 @@ while being designed specifically for JavaScript, TypeScript, and Wasm.
 ## Samples
 
 - [getting-started](./samples/getting-started): A React + TypeScript + Vite app showing how to connect to DsPdfJS and draw the same text and graphics to a PDF page, an SVG document, and a bitmap saved as PNG.
+- [pdf-form-fill-flatten](./samples/pdf-form-fill-flatten): Fill an AcroForm PDF from JSON and save editable or flattened output.
 
 ## Running a sample
 
