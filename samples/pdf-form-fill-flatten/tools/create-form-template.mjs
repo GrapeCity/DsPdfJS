@@ -44,8 +44,9 @@ try {
   const ctx = page.context;
   const form = doc.acroForm;
 
-  const labelFont = Font.getPdfFont(om, StandardPdfFont.HelveticaBold);
-  const titleFont = Font.getPdfFont(om, StandardPdfFont.HelveticaBold);
+  const boldFont = Font.getPdfFont(om, StandardPdfFont.HelveticaBold);
+  const labelFont = boldFont;
+  const titleFont = boldFont;
 
   // Title
   ctx.drawText({ text: "Membership Registration", font: titleFont, fontSize: 20 }, 56, 56);
