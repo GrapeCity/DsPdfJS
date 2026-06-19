@@ -18,26 +18,45 @@ while being designed specifically for JavaScript, TypeScript, and Wasm.
 
 ## Samples
 
+### Browser samples
+
 - [getting-started](./samples/getting-started): A React + TypeScript + Vite app showing how to connect to DsPdfJS and draw the same text and graphics to a PDF page, an SVG document, and a bitmap saved as PNG.
 - [pdf-form-fill-flatten](./samples/pdf-form-fill-flatten): Fill an AcroForm PDF from JSON and save editable or flattened output.
+
+### Node.js samples
+
 - [json-to-pdf-invoice](./samples/json-to-pdf-invoice): A Node.js + TypeScript CLI that turns invoice JSON into a multi-page PDF with an SVG logo, automatic pagination, totals, metadata, and page-number footers.
 
 ## Running a sample
 
-Each sample is a self-contained npm project. To run one:
+Each sample is a self-contained npm project with its own README and commands.
+
+### Browser samples
 
 ```bash
-cd samples/getting-started
+cd samples/<sample-name>
 npm install
 npm run dev
 ```
 
-Then open the URL Vite prints (usually `http://localhost:5173`).
+Open the local URL printed by the development server.
+
+### Node.js samples
+
+```bash
+cd samples/<sample-name>
+npm install
+npm run generate
+```
+
+Generated files are written to the sample's `output` directory. See the sample's README for additional commands and configuration.
+
+### Downloading a single sample
 
 To get just one sample without cloning the whole repository, you can use [tiged](https://github.com/tiged/tiged):
 
 ```bash
-npx tiged GrapeCity/DsPdfJS/samples/getting-started getting-started
+npx tiged GrapeCity/DsPdfJS/samples/<sample-name> <sample-name>
 ```
 
 ## License
