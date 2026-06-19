@@ -1,0 +1,40 @@
+{
+  "invoiceNumber": "DEMO-INV-0001",
+  "issueDate": "2026-06-15",
+  "dueDate": "2026-07-15",
+  "purchaseOrder": "DEMO-PO-0042",
+  "currency": "USD",
+  "seller": {
+    "name": "ACME Studios LLC",
+    "address": ["123 Example Avenue", "Sample City, NY 10001", "United States"],
+    "email": "billing@acme.example",
+    "phone": "+1 (212) 555-0100",
+    "website": "acme.example"
+  },
+  "customer": {
+    "name": "Example Research Cooperative",
+    "attention": "Attn: Alex Example",
+    "address": ["456 Placeholder Road", "Demo Town, MA 01234", "United States"],
+    "email": "accounts@example-research.example"
+  },
+  "items": [
+    { "sku": "DS-101", "description": "Discovery workshop", "details": "Stakeholder interviews, requirements mapping, and delivery roadmap.", "quantity": 2, "unitPrice": 1800 },
+    { "sku": "UX-210", "description": "User journey research", "details": "Research synthesis covering three personas and two primary workflows.", "quantity": 1, "unitPrice": 3200 },
+    { "sku": "UX-240", "description": "Wireframe design", "details": "Responsive low-fidelity flows for desktop and mobile breakpoints.", "quantity": 42, "unitPrice": 145 },
+    { "sku": "UI-310", "description": "Visual design system", "details": "Color, typography, spacing, components, and accessible interaction states.", "quantity": 1, "unitPrice": 6800 },
+    { "sku": "UI-325", "description": "Data visualization kit", "details": "Reusable chart treatments for research dashboards and exported reports.", "quantity": 1, "unitPrice": 3900 },
+    { "sku": "DEV-410", "description": "Component implementation", "details": "TypeScript implementation of approved interface components.", "quantity": 64, "unitPrice": 175 },
+    { "sku": "DEV-430", "description": "PDF report templates", "details": "Branded cover, executive summary, findings, and appendix templates.", "quantity": 5, "unitPrice": 950 },
+    { "sku": "DEV-445", "description": "SVG asset preparation", "details": "Optimization and accessibility pass for diagrams and iconography.", "quantity": 18, "unitPrice": 95 },
+    { "sku": "QA-510", "description": "Accessibility review", "details": "Keyboard, contrast, screen-reader, and document-output review.", "quantity": 20, "unitPrice": 150 },
+    { "sku": "QA-530", "description": "Cross-browser verification", "details": "Verification on current Chrome, Firefox, Safari, and Edge releases.", "quantity": 14, "unitPrice": 135 },
+    { "sku": "PM-610", "description": "Project management", "details": "Weekly planning, status reporting, risk tracking, and coordination.", "quantity": 36, "unitPrice": 120 },
+    { "sku": "DOC-710", "description": "Developer documentation", "details": "Setup guide, architecture notes, API examples, and release checklist.", "quantity": 24, "unitPrice": 130 },
+    { "sku": "TRN-810", "description": "Team enablement session", "details": "Live two-hour implementation walkthrough with recorded Q&A.", "quantity": 2, "unitPrice": 1250 },
+    { "sku": "OPS-910", "description": "Launch support", "details": "Production-readiness review and monitored launch-day support.", "quantity": 12, "unitPrice": 185 }
+  ],
+  "discount": 1250,
+  "taxRate": 0.0825,
+  "paymentTerms": "Payment is due within 30 days. Please include the invoice number with your bank transfer.",
+  "notes": "Thank you for partnering with ACME Studios. Questions about this demo invoice? Contact billing@acme.example."
+}
