@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.vite-cache/
+public/DsPdf.wasm
+package-lock.json
+*.log
