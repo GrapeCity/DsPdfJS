@@ -22,6 +22,7 @@ while being designed specifically for JavaScript, TypeScript, and Wasm.
 
 - [getting-started](./samples/getting-started): A React + TypeScript + Vite app showing how to connect to DsPdfJS and draw the same text and graphics to a PDF page, an SVG document, and a bitmap saved as PNG.
 - [pdf-form-fill-flatten](./samples/pdf-form-fill-flatten): Fill an AcroForm PDF from JSON and save editable or flattened output.
+- [pii-search-and-redact](./samples/pii-search-and-redact): Find common PII and exact text in a PDF, preview the matches, permanently redact selected values, and verify that they can no longer be extracted.
 
 ### Node.js samples
 
