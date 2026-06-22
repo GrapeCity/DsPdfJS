@@ -63,4 +63,4 @@ for their documents and requirements.
 ## License key
 
 Without a license key, DsPdfJS runs in trial mode and adds an evaluation notice to generated or rendered output.
-To use a key, call `DsPdfConfig.setLicenseKey()` before `connectDsPdf()` in [`src/Demos.ts`](./src/Demos.ts).
+To use a key, call `await DsPdfConfig.setLicenseKey("YOUR_KEY")` before `connectDsPdf()` in [`src/Demos.ts`](./src/Demos.ts).
