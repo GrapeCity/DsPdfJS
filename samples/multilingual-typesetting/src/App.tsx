@@ -1,53 +1,81 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Demos } from "./Demos";
 
 function bytesToUrl(bytes: Uint8Array, mimeType: string): string {
   return URL.createObjectURL(new Blob([bytes as BlobPart], { type: mimeType }));
 }
 
+/**
+ * Replaces the fixed width/height of the generated SVG with a viewBox,
+ * so the page previews scale to the width of their container.
+ **/
+function toResponsiveSvg(svg: string): string {
+  return svg.replace(
+    /<svg width="([0-9.]+)" height="([0-9.]+)"/,
+    '<svg viewBox="0 0 $1 $2"',
+  );
+}
+
 export default function App() {
   const [busy, setBusy] = useState(true);
+  const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("Loading DsPdfJS...");
-  const [pageUrls, setPageUrls] = useState<string[]>([]);
+  const [textAsPath, setTextAsPath] = useState(false);
+  const [pageSvgs, setPageSvgs] = useState<string[]>([]);
+  const initialized = useRef(false);
+
+  const render = async (asPath: boolean) => {
+    setBusy(true);
+    setError("");
+    setStatus("Typesetting...");
+    try {
+      const result = await Demos.renderShowcase(asPath);
+      setPageSvgs(result.previewSvgs.map(toResponsiveSvg));
+      setStatus(
+        `Rendered ${result.pageCount} pages as SVG with ` +
+          `${asPath ? "text as vector paths" : "selectable text and embedded fonts"}.`,
+      );
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : String(caught));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   useEffect(() => {
-    let active = true;
+    // Initialize exactly once. The wasm module and fonts are kept for the
+    // lifetime of the page, so React StrictMode's simulated remount in dev
+    // must not disconnect them or re-run the initialization.
+    if (initialized.current) return;
+    initialized.current = true;
     const initialize = async () => {
       try {
         if (!(await Demos.connect())) throw new Error("Unable to initialize DsPdfJS.");
-        if (!active) return;
         setStatus("Loading fonts...");
         await Demos.loadFonts();
-        if (!active) return;
-        setStatus("Typesetting...");
-        const result = await Demos.renderShowcase();
-        if (!active) return;
-        setPageUrls((current) => {
-          current.forEach((url) => URL.revokeObjectURL(url));
-          return result.previewPngs.map((png) => bytesToUrl(png, "image/png"));
-        });
-        setStatus(`Rendered ${result.pageCount} pages with DsPdfJS ${Demos.apiVersion}.`);
+        setReady(true);
+        await render(false);
       } catch (caught) {
-        if (active) setError(caught instanceof Error ? caught.message : String(caught));
-      } finally {
-        if (active) setBusy(false);
+        setError(caught instanceof Error ? caught.message : String(caught));
+        setBusy(false);
       }
     };
     void initialize();
-    return () => {
-      active = false;
-      Demos.disconnect();
-    };
     // Initialization intentionally runs once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const toggleTextAsPath = (asPath: boolean) => {
+    setTextAsPath(asPath);
+    void render(asPath);
+  };
 
   const download = async () => {
     setBusy(true);
     setError("");
     try {
-      const pdf = await Demos.createPdf();
+      const pdf = await Demos.createPdf(textAsPath);
       const url = bytesToUrl(pdf, "application/pdf");
       const link = document.createElement("a");
       link.href = url;
@@ -69,24 +97,42 @@ export default function App() {
         <p>
           Bidirectional Arabic and Hebrew, vertical Japanese, automatic font fallback across six
           scripts, and Unicode line breaking - typeset to PDF entirely in your browser by the
-          DsPdfJS text engine.
+          DsPdfJS text engine. Previews are SVG, generated from the same pages.
         </p>
         <div className="toolbar">
-          <button type="button" className="primary" disabled={busy || pageUrls.length === 0} onClick={() => void download()}>
+          <button type="button" className="primary" disabled={busy || !ready} onClick={() => void download()}>
             Download PDF
           </button>
+          <label className="toggle">
+            <input
+              type="checkbox"
+              checked={textAsPath}
+              disabled={busy || !ready}
+              onChange={(event) => toggleTextAsPath(event.target.checked)}
+            />
+            Text as path{" "}
+            <small>
+              (applies to the previews and the downloaded PDF; when unchecked, text is
+              selectable and searchable - try Ctrl+F on the preview)
+            </small>
+          </label>
           <span className="status">{busy ? status : error ? "" : status}</span>
         </div>
         {error && <div className="error">{error}</div>}
       </header>
 
-      <section className="pages">
-        {pageUrls.map((url, pageIndex) => (
-          <figure className="page" key={url}>
-            <img src={url} alt={`Typeset page ${pageIndex + 1}`} />
-          </figure>
+      <section className={`pages ${busy ? "busy" : ""}`}>
+        {pageSvgs.map((svg, pageIndex) => (
+          <figure
+            className="page"
+            key={`${textAsPath}-${pageIndex}`}
+            aria-label={`Typeset page ${pageIndex + 1}`}
+            // The SVG is generated locally by DsPdfJS from this sample's own
+            // content; it is inlined so text stays selectable and searchable.
+            dangerouslySetInnerHTML={{ __html: svg }}
+          />
         ))}
-        {pageUrls.length === 0 && !error && <div className="placeholder"><span>{status}</span></div>}
+        {pageSvgs.length === 0 && !error && <div className="placeholder"><span>{status}</span></div>}
       </section>
     </main>
   );

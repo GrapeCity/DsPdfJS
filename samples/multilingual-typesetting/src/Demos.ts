@@ -16,7 +16,7 @@ import {
   withObjectManager,
 } from "@mescius/ds-pdf";
 
-export type ShowcaseResult = { pageCount: number; previewPngs: Uint8Array[] };
+export type ShowcaseResult = { pageCount: number; previewSvgs: string[] };
 
 /** The Noto fonts downloaded into public/fonts by tools/download-fonts.mjs. */
 const FONT_FILES = {
@@ -146,30 +146,47 @@ export class Demos {
     }
   }
 
-  /** Renders the showcase pages as PNG previews (no PDF bytes are produced). */
+  /**
+   * Renders the showcase pages as SVG previews (no PDF bytes are produced).
+   *
+   * With textAsPath true, all text is converted to vector paths: the result
+   * displays identically everywhere and stays crisp at any zoom. Otherwise
+   * text is saved as SVG text elements with the fonts embedded, so it can be
+   * selected, copied, and searched in the browser. (Vertical text is always
+   * saved as paths.)
+   **/
   @withObjectManager
-  static async renderShowcase(): Promise<ShowcaseResult> {
-    const doc = this.buildShowcase();
-    const previewPngs: Uint8Array[] = [];
+  static async renderShowcase(textAsPath: boolean): Promise<ShowcaseResult> {
+    const options = textAsPath
+      ? { drawSvgTextAsPath: true }
+      : { drawSvgTextAsPath: false, embedSvgFonts: true, preciseCharPositions: true };
+    const doc = this.buildShowcase(false);
+    const decoder = new TextDecoder();
+    const previewSvgs: string[] = [];
     for (let pageIndex = 0; pageIndex < doc.pages.count; pageIndex++) {
-      previewPngs.push(doc.pages.getAt(pageIndex).saveAsPng({ zoom: 1.2 }));
+      previewSvgs.push(decoder.decode(doc.pages.getAt(pageIndex).saveAsSvg(options)));
     }
-    return { pageCount: doc.pages.count, previewPngs };
+    return { pageCount: doc.pages.count, previewSvgs };
   }
 
   /**
    * Builds a fresh document and returns it as PDF bytes. A new document is
    * built for each download so that previews are never rendered from a
    * document that savePdf() has already been called on.
+   *
+   * With textAsPath true, DrawingContext.drawTextAsPath outlines all text as
+   * vector paths right in the PDF content, so the document has no text layer:
+   * nothing can be selected, copied, or found by search. Use it deliberately -
+   * it also means no accessibility and larger files.
    **/
   @withObjectManager
-  static async createPdf(): Promise<Uint8Array> {
-    return this.buildShowcase().savePdf();
+  static async createPdf(textAsPath: boolean): Promise<Uint8Array> {
+    return this.buildShowcase(textAsPath).savePdf();
   }
 
   //#region document content
 
-  private static buildShowcase(): PdfDocument {
+  private static buildShowcase(textAsPath: boolean): PdfDocument {
     if (!this.fonts || !this.collection) {
       throw new Error("Fonts are not loaded yet.");
     }
@@ -178,8 +195,8 @@ export class Demos {
       title: "Multilingual typesetting with DsPdfJS",
       author: "DsPdfJS sample",
     };
-    this.buildBidiPage(doc);
-    this.buildVerticalPage(doc);
+    this.buildBidiPage(doc, textAsPath);
+    this.buildVerticalPage(doc, textAsPath);
     return doc;
   }
 
@@ -222,9 +239,10 @@ export class Demos {
     return y + tl.contentHeight + 12;
   }
 
-  private static buildBidiPage(doc: PdfDocument): void {
+  private static buildBidiPage(doc: PdfDocument, textAsPath: boolean): void {
     const fonts = this.fonts!;
     const ctx = doc.newPageContext({ width: PAGE_W, height: PAGE_H });
+    ctx.drawTextAsPath = textAsPath;
     let y = MARGIN;
 
     y = this.drawHeading(
@@ -301,9 +319,10 @@ export class Demos {
     ctx.drawLayout(note, MARGIN + columnWidth + 32, y);
   }
 
-  private static buildVerticalPage(doc: PdfDocument): void {
+  private static buildVerticalPage(doc: PdfDocument, textAsPath: boolean): void {
     const fonts = this.fonts!;
     const ctx = doc.newPageContext({ width: PAGE_W, height: PAGE_H });
+    ctx.drawTextAsPath = textAsPath;
     let y = MARGIN;
 
     y = this.drawHeading(

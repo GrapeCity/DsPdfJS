@@ -31,9 +31,14 @@ header p { margin: 0 0 18px; color: #626b7d; font-size: 18px; line-height: 1.55;
 .status { color: #737b8e; font-size: 13px; }
 .error { margin-top: 14px; border-radius: 9px; padding: 10px 12px; font-size: 13px; font-weight: 650; color: #9b2424; background: #fff0f0; }
 
-.pages { display: grid; gap: 22px; }
+.toggle { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 650; cursor: pointer; }
+.toggle small { color: #7b8394; font-weight: 500; }
+.toggle input { accent-color: #6742c7; }
+
+.pages { display: grid; gap: 22px; transition: opacity .2s ease; }
+.pages.busy { opacity: .4; pointer-events: none; }
 .page { margin: 0; overflow: hidden; border-radius: 12px; background: #fff; border: 1px solid #e1e4ec; box-shadow: 0 12px 30px rgba(31, 38, 55, .08); }
-.page img { display: block; width: 100%; height: auto; }
+.page svg { display: block; width: 100%; height: auto; }
 .placeholder { display: grid; place-items: center; aspect-ratio: 612 / 792; border-radius: 12px; color: #9097a6; background: linear-gradient(135deg, #f6f7fa, #e9ecf2); }
 
 @media (max-width: 720px) {
