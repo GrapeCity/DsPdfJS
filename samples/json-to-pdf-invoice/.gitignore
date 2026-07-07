@@ -3,3 +3,7 @@ dist/
 output/
 *.log
 package-lock.json
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json

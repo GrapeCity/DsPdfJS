@@ -14,24 +14,11 @@ browser, with the text engine of
 - Vertical Japanese text (`FlowDirection.VerticalRightToLeft`): lines stacked right to left, with Latin text drawn upright character by character (`uprightInVerticalText`).
 - Tate-chu-yoko (縦中横): short runs of any Latin characters - numbers or words like "PDF" - set horizontally inside the vertical line, combining `textRunAsCluster`, `uprightInVerticalText`, and quarter-width glyphs (`GlyphWidths.QuarterWidths`).
 - Language-aware line breaking: Thai has no spaces between words, yet wraps and justifies correctly in a narrow column.
-- Page previews rendered as vector SVG with `page.saveAsSvg()` and inlined into the page.
-- A **Text as path** toggle that controls how the previews and the downloaded PDF are created:
-  - **Unchecked** (default): text stays text. The SVG previews use text elements with
-    embedded fonts (`drawSvgTextAsPath: false` with `embedSvgFonts` and
-    `preciseCharPositions`), so text can be selected, copied, and found with Ctrl+F right
-    in the preview; the PDF is saved with a real text layer - selectable, searchable,
-    extractable. (Vertical text is still saved as paths in SVG for presentation in the browser,
-    but is preserved as text in PDF.)
-  - **Checked**: every glyph becomes a vector path. Previews render identically in every
-    browser with no font dependencies, and the PDF is drawn with
-    `DrawingContext.drawTextAsPath`, so it has no text layer at all - useful when text
-    copying or searching should be prevented, at the cost of accessibility. (File size can
-    go either way: outlines add geometry but remove the embedded fonts - with CJK font
-    subsets this document actually gets smaller.)
-
-The sample shows text-as-path control at two levels offered by the DsPdfJS API: while drawing
-into the PDF (`DrawingContext.drawTextAsPath`) and when exporting a page to SVG
-(`drawSvgTextAsPath`); raster PNG output is unaffected by these options.
+- Page previews rendered as vector SVG with `page.saveAsSvg({ drawSvgTextAsPath: true })`
+  and inlined into the page: every glyph becomes a vector path, so the previews are crisp
+  at any zoom and display identically in every browser, with no font dependencies.
+- The downloaded PDF is saved with `doc.savePdf()` and contains a real text layer -
+  selectable, searchable, and extractable.
 
 ## Run the sample
 
@@ -59,7 +46,7 @@ All typesetting lives in [`src/Demos.ts`](./src/Demos.ts):
    fallback fonts.
 2. Every `Layout` is created with that `fontCollection`, so any run can fall back to the
    right font per script.
-3. `renderShowcase()` builds the document and renders each page to PNG for display.
+3. `renderShowcase()` builds the document and renders each page to SVG for display.
 4. `createPdf()` builds a fresh document and calls `savePdf()` once per download, so
    previews are never rendered from an already-saved document.
 

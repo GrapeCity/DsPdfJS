@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Generate invoice",
+      "request": "launch",
+      "type": "node",
+      "program": "${workspaceFolder}/dist/generate-invoice.js",
+      "preLaunchTask": "npm: build",
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
+    }
+  ]
+}

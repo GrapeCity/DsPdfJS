@@ -13,7 +13,6 @@ dist-ssr
 *.local
 
 # Editor directories and files
-# (launch.json and tasks.json are part of this sample - see the blog post)
 .vscode/*
 !.vscode/extensions.json
 !.vscode/launch.json
@@ -25,3 +24,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+package-lock.json

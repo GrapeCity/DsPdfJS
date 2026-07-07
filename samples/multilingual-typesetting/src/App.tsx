@@ -21,27 +21,8 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("Loading DsPdfJS...");
-  const [textAsPath, setTextAsPath] = useState(false);
   const [pageSvgs, setPageSvgs] = useState<string[]>([]);
   const initialized = useRef(false);
-
-  const render = async (asPath: boolean) => {
-    setBusy(true);
-    setError("");
-    setStatus("Typesetting...");
-    try {
-      const result = await Demos.renderShowcase(asPath);
-      setPageSvgs(result.previewSvgs.map(toResponsiveSvg));
-      setStatus(
-        `Rendered ${result.pageCount} pages as SVG with ` +
-          `${asPath ? "text as vector paths" : "selectable text and embedded fonts"}.`,
-      );
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
-    } finally {
-      setBusy(false);
-    }
-  };
 
   useEffect(() => {
     // Initialize exactly once. The wasm module and fonts are kept for the
@@ -54,28 +35,25 @@ export default function App() {
         if (!(await Demos.connect())) throw new Error("Unable to initialize DsPdfJS.");
         setStatus("Loading fonts...");
         await Demos.loadFonts();
+        setStatus("Typesetting...");
+        const result = await Demos.renderShowcase();
+        setPageSvgs(result.previewSvgs.map(toResponsiveSvg));
+        setStatus(`Rendered ${result.pageCount} pages with DsPdfJS ${Demos.apiVersion}.`);
         setReady(true);
-        await render(false);
       } catch (caught) {
         setError(caught instanceof Error ? caught.message : String(caught));
+      } finally {
         setBusy(false);
       }
     };
     void initialize();
-    // Initialization intentionally runs once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const toggleTextAsPath = (asPath: boolean) => {
-    setTextAsPath(asPath);
-    void render(asPath);
-  };
 
   const download = async () => {
     setBusy(true);
     setError("");
     try {
-      const pdf = await Demos.createPdf(textAsPath);
+      const pdf = await Demos.createPdf();
       const url = bytesToUrl(pdf, "application/pdf");
       const link = document.createElement("a");
       link.href = url;
@@ -97,25 +75,13 @@ export default function App() {
         <p>
           Bidirectional Arabic and Hebrew, vertical Japanese, automatic font fallback across six
           scripts, and Unicode line breaking - typeset to PDF entirely in your browser by the
-          DsPdfJS text engine. Previews are SVG, generated from the same pages.
+          DsPdfJS text engine. Previews are vector SVG generated from the same pages; the
+          downloaded PDF contains real, searchable text.
         </p>
         <div className="toolbar">
           <button type="button" className="primary" disabled={busy || !ready} onClick={() => void download()}>
             Download PDF
           </button>
-          <label className="toggle">
-            <input
-              type="checkbox"
-              checked={textAsPath}
-              disabled={busy || !ready}
-              onChange={(event) => toggleTextAsPath(event.target.checked)}
-            />
-            Text as path{" "}
-            <small>
-              (applies to the previews and the downloaded PDF; when unchecked, text is
-              selectable and searchable - try Ctrl+F on the preview)
-            </small>
-          </label>
           <span className="status">{busy ? status : error ? "" : status}</span>
         </div>
         {error && <div className="error">{error}</div>}
@@ -125,10 +91,9 @@ export default function App() {
         {pageSvgs.map((svg, pageIndex) => (
           <figure
             className="page"
-            key={`${textAsPath}-${pageIndex}`}
+            key={pageIndex}
             aria-label={`Typeset page ${pageIndex + 1}`}
-            // The SVG is generated locally by DsPdfJS from this sample's own
-            // content; it is inlined so text stays selectable and searchable.
+            // The SVG is generated locally by DsPdfJS from this sample's own content.
             dangerouslySetInnerHTML={{ __html: svg }}
           />
         ))}

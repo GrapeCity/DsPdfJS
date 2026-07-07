@@ -5,3 +5,7 @@ public/DsPdf.wasm
 public/fonts/
 package-lock.json
 *.log
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
