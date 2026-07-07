@@ -13,7 +13,9 @@ DsPdfJS lets you:
 - Convert between formats — e.g., save PDF pages as SVG or PNG, or draw an SVG onto a PDF page as vector graphics.
 
 The library is powered by a WebAssembly (Wasm) module (`DsPdf.wasm`) implemented in C++ and exposed through a rich JavaScript/TypeScript API.
-It provides functionality comparable to Document Solutions for PDF (DsPdf) and Document Solutions for Imaging (DsImaging),
+It provides functionality comparable to
+[Document Solutions for PDF .NET (DsPdf)](https://developer.mescius.com/document-solutions/dot-net-pdf-api) and 
+[Document Solutions for Imaging .NET (DsImaging)](https://developer.mescius.com/document-solutions/dot-net-imaging-api),
 while being designed specifically for JavaScript, TypeScript, and Wasm.
 
 ## Samples
