@@ -26,6 +26,7 @@ while being designed specifically for JavaScript, TypeScript, and Wasm.
 - [pdf-form-fill-flatten](./samples/pdf-form-fill-flatten): Fill an AcroForm PDF from JSON and save editable or flattened output.
 - [multilingual-typesetting](./samples/multilingual-typesetting): Bidirectional Arabic and Hebrew, vertical Japanese, automatic font fallback across six scripts, and Unicode line breaking (spaceless Thai) - typeset to PDF in the browser.
 - [pii-search-and-redact](./samples/pii-search-and-redact): Find common PII and exact text in a PDF, preview the matches, permanently redact selected values, and verify that they can no longer be extracted.
+- [pdf-text-replace](./samples/pdf-text-replace): Find and replace text in a PDF with `PdfDocument.replaceText()`, apply multiple replacements to the same document, and preview the before/after result in the browser.
 
 ### Node.js samples
 
