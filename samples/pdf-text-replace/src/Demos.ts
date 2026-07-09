@@ -3,9 +3,32 @@ import {
   disconnectDsPdf,
   DsPdf,
   DsPdfConfig,
+  Font,
   PdfDocument,
+  StandardPdfFont,
   withObjectManager,
 } from "@mescius/ds-pdf";
+
+// The 14 standard PDF fonts, offered as replacement-font choices. The value is
+// the StandardPdfFont enum member passed to Font.getPdfFont().
+export const STANDARD_FONTS: ReadonlyArray<{ label: string; value: StandardPdfFont }> = [
+  { label: "Helvetica", value: StandardPdfFont.Helvetica },
+  { label: "Helvetica Bold", value: StandardPdfFont.HelveticaBold },
+  { label: "Helvetica Italic", value: StandardPdfFont.HelveticaItalic },
+  { label: "Helvetica Bold Italic", value: StandardPdfFont.HelveticaBoldItalic },
+  { label: "Times", value: StandardPdfFont.Times },
+  { label: "Times Bold", value: StandardPdfFont.TimesBold },
+  { label: "Times Italic", value: StandardPdfFont.TimesItalic },
+  { label: "Times Bold Italic", value: StandardPdfFont.TimesBoldItalic },
+  { label: "Courier", value: StandardPdfFont.Courier },
+  { label: "Courier Bold", value: StandardPdfFont.CourierBold },
+  { label: "Courier Italic", value: StandardPdfFont.CourierItalic },
+  { label: "Courier Bold Italic", value: StandardPdfFont.CourierBoldItalic },
+  { label: "Symbol", value: StandardPdfFont.Symbol },
+  { label: "Zapf Dingbats", value: StandardPdfFont.ZapfDingbats },
+];
+
+const STANDARD_FONT_VALUES = new Set<number>(STANDARD_FONTS.map((f) => f.value));
 
 export type AnalysisResult = {
   occurrences: number;
@@ -87,9 +110,14 @@ export class Demos {
     newText: string,
     matchCase: boolean,
     fontSize: number | null,
+    fontId: StandardPdfFont | null,
   ): Promise<ReplaceResult> {
     const doc = PdfDocument.load(pdfBytes);
     const replacedCount = this.countMatches(doc, searchTerm, matchCase);
+
+    // A chosen standard font is resolved with the current ObjectManager (set by
+    // @withObjectManager); null means keep the text's current font.
+    const font = fontId !== null && STANDARD_FONT_VALUES.has(fontId) ? Font.getPdfFont(fontId) : null;
 
     // Edit the actual content stream. `font: null` keeps the current font;
     // `fontSize: null` keeps the current size.
@@ -100,7 +128,7 @@ export class Demos {
     // reads naturally to a human is not always a single replaceable unit. The
     // bundled sample PDF uses simple, plain text so this behaves predictably;
     // when replacing text in arbitrary PDFs, review the output.
-    doc.replaceText({ text: searchTerm, matchCase }, newText, undefined, null, fontSize);
+    doc.replaceText({ text: searchTerm, matchCase }, newText, undefined, font, fontSize);
 
     return {
       pdf: doc.savePdf(),

@@ -1,5 +1,5 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import { Demos } from "./Demos";
+import { Demos, STANDARD_FONTS } from "./Demos";
 
 const DEFAULT_SEARCH = "Acme Corp";
 const DEFAULT_REPLACEMENT = "Globex Inc";
@@ -30,8 +30,9 @@ export default function App() {
   const [sourceName, setSourceName] = useState(SAMPLE_NAME);
 
   // The working document. Each replacement mutates this in place (by producing
-  // new bytes) so multiple replacements accumulate before the PDF is saved.
-  // The "Before" preview keeps showing the originally opened document.
+  // new bytes) so multiple replacements accumulate before the PDF is saved. The
+  // preview always shows this working copy, i.e. exactly what the next
+  // replacement will operate on.
   const [workingBytes, setWorkingBytes] = useState<Uint8Array | null>(null);
   const [edited, setEdited] = useState(false);
 
@@ -39,14 +40,14 @@ export default function App() {
   const [replacement, setReplacement] = useState(DEFAULT_REPLACEMENT);
   const [matchCase, setMatchCase] = useState(false);
   const [fontSize, setFontSize] = useState("");
+  const [fontChoice, setFontChoice] = useState(""); // "" = keep the current font
   const [occurrences, setOccurrences] = useState<number | null>(null);
   const [searchedTerm, setSearchedTerm] = useState("");
   // The inline count is only meaningful right after an explicit Find. Replacing
   // (or opening a new document) invalidates it, so it is hidden until the next Find.
   const [showCount, setShowCount] = useState(false);
 
-  const [beforeUrls, setBeforeUrls] = useState<string[]>([]);
-  const [afterUrls, setAfterUrls] = useState<string[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [resultPdf, setResultPdf] = useState<Uint8Array | null>(null);
   const [verification, setVerification] = useState("");
 
@@ -58,7 +59,7 @@ export default function App() {
   };
 
   // Loads a fresh document: resets the working copy and any accumulated edits,
-  // renders the "Before" preview, and reports the initial occurrence count.
+  // renders the preview, and reports the initial occurrence count.
   const openDocument = async (bytes: Uint8Array, name: string) => {
     const term = searchTerm.trim();
     setBusy(true);
@@ -67,7 +68,6 @@ export default function App() {
     setResultPdf(null);
     setEdited(false);
     setShowCount(false);
-    replacePreviews([], setAfterUrls);
     try {
       const result = await Demos.analyze(bytes, term, matchCase);
       setWorkingBytes(bytes);
@@ -76,7 +76,7 @@ export default function App() {
       setSearchedTerm(term);
       replacePreviews(
         result.previewPngs.map((png) => bytesToUrl(png, "image/png")),
-        setBeforeUrls,
+        setPreviewUrls,
       );
       setStatus(
         `Found ${result.occurrences} occurrence${result.occurrences === 1 ? "" : "s"} across ${result.pageCount} page${result.pageCount === 1 ? "" : "s"}.`,
@@ -152,12 +152,14 @@ export default function App() {
       setError("Font size must be a positive number, or left blank to keep the original size.");
       return;
     }
+    const fontId = fontChoice === "" ? null : Number(fontChoice);
 
     setBusy(true);
     setError("");
     try {
-      const result = await Demos.replace(workingBytes, term, replacement, matchCase, size);
-      // Feed the edited bytes back so the next replacement builds on this one.
+      const result = await Demos.replace(workingBytes, term, replacement, matchCase, size, fontId);
+      // Feed the edited bytes back so the next replacement builds on this one,
+      // and update the preview to show the new working document.
       setWorkingBytes(result.pdf);
       setResultPdf(result.pdf);
       setEdited(true);
@@ -166,7 +168,7 @@ export default function App() {
       setShowCount(false);
       replacePreviews(
         result.previewPngs.map((png) => bytesToUrl(png, "image/png")),
-        setAfterUrls,
+        setPreviewUrls,
       );
       setVerification(
         `Replaced ${result.replacedCount} occurrence${result.replacedCount === 1 ? "" : "s"}. ` +
@@ -206,14 +208,6 @@ export default function App() {
 
       <section className="workspace">
         <div className="panel controls">
-          <div className="panel-heading">
-            <div>
-              <span className="step">1</span>
-              <h2>Choose the text to replace</h2>
-            </div>
-            <span className="status">{busy ? "Working..." : status}</span>
-          </div>
-
           <div className="toolbar">
             <button type="button" onClick={() => void loadSample()} disabled={!ready || busy}>
               Reload sample
@@ -231,40 +225,53 @@ export default function App() {
                 }}
               />
             </label>
+            <span className="status">{busy ? "Working..." : status}</span>
           </div>
 
-          <div className="field">
-            <label htmlFor="search-term">Find</label>
-            <div className="field-row">
-              <input
-                id="search-term"
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-              />
-              <button
-                type="button"
-                className="secondary"
-                disabled={!workingBytes || busy || !searchTerm.trim()}
-                onClick={() => void find()}
-              >
-                Find
-              </button>
+          <div className="edit-grid">
+            <div className="field">
+              <label htmlFor="search-term">Find</label>
+              <div className="field-row">
+                <input
+                  id="search-term"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                />
+                <button
+                  type="button"
+                  className="secondary"
+                  disabled={!workingBytes || busy || !searchTerm.trim()}
+                  onClick={() => void find()}
+                >
+                  Find
+                </button>
+              </div>
+              {showCount && occurrences !== null && searchTerm.trim() === searchedTerm && (
+                <p className="hint">
+                  {occurrences} occurrence{occurrences === 1 ? "" : "s"} of{" "}
+                  <code>{searchedTerm || "(empty)"}</code> in the {edited ? "edited" : "current"} document.
+                </p>
+              )}
             </div>
-            {showCount && occurrences !== null && searchTerm.trim() === searchedTerm && (
-              <p className="hint">
-                {occurrences} occurrence{occurrences === 1 ? "" : "s"} of{" "}
-                <code>{searchedTerm || "(empty)"}</code> in the {edited ? "edited" : "current"} document.
-              </p>
-            )}
-          </div>
 
-          <div className="field">
-            <label htmlFor="replacement">Replace with</label>
-            <input
-              id="replacement"
-              value={replacement}
-              onChange={(event) => setReplacement(event.target.value)}
-            />
+            <div className="field">
+              <label htmlFor="replacement">Replace with</label>
+              <div className="field-row">
+                <input
+                  id="replacement"
+                  value={replacement}
+                  onChange={(event) => setReplacement(event.target.value)}
+                />
+                <button
+                  type="button"
+                  className="primary"
+                  disabled={!canReplace}
+                  onClick={() => void replaceAll()}
+                >
+                  Replace all
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="options">
@@ -275,6 +282,21 @@ export default function App() {
                 onChange={(event) => setMatchCase(event.target.checked)}
               />
               Match case
+            </label>
+            <label className="check">
+              Font
+              <select
+                className="font-select"
+                value={fontChoice}
+                onChange={(event) => setFontChoice(event.target.value)}
+              >
+                <option value="">keep original</option>
+                {STANDARD_FONTS.map((font) => (
+                  <option key={font.value} value={font.value}>
+                    {font.label}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="check">
               Font size
@@ -291,21 +313,6 @@ export default function App() {
             </label>
           </div>
 
-          <div className="redact-actions">
-            <div>
-              <span className="step">2</span>
-              <strong>Replace throughout the document</strong>
-            </div>
-            <button type="button" className="primary" disabled={!canReplace} onClick={() => void replaceAll()}>
-              Replace all
-            </button>
-          </div>
-
-          <p className="hint tip">
-            Replacements accumulate on the same document - run <em>Replace all</em> as many times as
-            you need (with different terms) before saving.
-          </p>
-
           {verification && <div className="success">{verification}</div>}
           {error && <div className="error">{error}</div>}
         </div>
@@ -314,34 +321,20 @@ export default function App() {
           <article className="panel preview-card">
             <div className="preview-heading">
               <div>
-                <span>Before</span>
-                <h2>Original document</h2>
+                <span>{edited ? "Edited" : "Original"}</span>
+                <h2>{edited ? "Current document" : "Loaded document"}</h2>
               </div>
-              <code>{sourceName}</code>
+              <div className="preview-actions">
+                <code>{sourceName}</code>
+                <button type="button" className="secondary compact" disabled={!resultPdf} onClick={download}>
+                  Save PDF
+                </button>
+              </div>
             </div>
-            {beforeUrls.length > 0 ? (
-              <PagePreviews urls={beforeUrls} description="Source PDF" />
+            {previewUrls.length > 0 ? (
+              <PagePreviews urls={previewUrls} description="Working PDF" />
             ) : (
               <div className="placeholder" />
-            )}
-          </article>
-
-          <article className="panel preview-card">
-            <div className="preview-heading">
-              <div>
-                <span>After</span>
-                <h2>Text replaced</h2>
-              </div>
-              <button type="button" className="secondary compact" disabled={!resultPdf} onClick={download}>
-                Save PDF
-              </button>
-            </div>
-            {afterUrls.length > 0 ? (
-              <PagePreviews urls={afterUrls} description="PDF after replacing text" />
-            ) : (
-              <div className="placeholder">
-                <span>Replaced preview appears here</span>
-              </div>
             )}
           </article>
         </div>
